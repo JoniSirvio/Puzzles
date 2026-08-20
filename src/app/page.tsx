@@ -119,7 +119,7 @@ export default function HomePage() {
           {/* 1. Expandable Search Trigger Button */}
           <button
             onClick={() => setMobileSearchOpen(true)}
-            className="flex-1 flex items-center gap-2 bg-[#f4f8f5] hover:bg-[#e2f0e8] text-[#4a6b5d] px-3.5 py-2.5 rounded-xl border border-[#d2e6db] font-semibold text-xs transition-colors min-h-[44px] min-w-0"
+            className="flex-1 flex items-center gap-2 bg-[#f4f8f5] hover:bg-[#e2f0e8] text-[#4a6b5d] px-3.5 py-2.5 rounded-xl border border-[#d2e6db] font-semibold text-sm transition-colors min-h-[44px] min-w-0"
           >
             <Search className="w-4 h-4 text-[#047857] shrink-0" />
             <span className="truncate">{search ? `"${search}"` : 'Etsi...'}</span>
