@@ -13,6 +13,11 @@
 # production
 /build
 
+# firebase build artifacts
+.firebase/
+firebase-debug.log
+firebase-debug.*.log
+
 # misc
 .DS_Store
 *.pem

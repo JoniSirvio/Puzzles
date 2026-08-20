@@ -1,5 +1,15 @@
 {
   "firestore": {
     "rules": "firestore.rules"
+  },
+  "hosting": {
+    "site": "puzzles-ccfee",
+    "app": "1:742565754612:web:cf7e6324cd542b0c1c50a1",
+    "source": ".",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ]
   }
 }
