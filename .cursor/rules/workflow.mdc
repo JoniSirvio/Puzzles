@@ -1,0 +1,10 @@
+---
+description: Strict workflow rules for deployment and git commits
+globs: *
+---
+
+# Workflow Rules
+
+1. **NO DIRECT DEPLOYS**: NEVER run `firebase deploy` or publish directly to production unless the user explicitly requests a production deployment after their local QA.
+2. **LOCAL COMMITS & GITHUB**: All changes must be committed locally, tested locally, and pushed to GitHub when approved by the user.
+3. **USER QA FIRST**: The user performs local QA and manual testing before any release or push.
