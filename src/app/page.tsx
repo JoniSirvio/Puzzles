@@ -157,7 +157,7 @@ export default function HomePage() {
             </button>
 
             {/* 3. Sort Select Dropdown */}
-            <SortControls value={sort} onChange={setSort} />
+            <SortControls value={sort} onChange={setSort} compact />
           </div>
         )}
       </div>
