@@ -1,7 +1,7 @@
 'use client';
 
 import { Search, X } from 'lucide-react';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 interface SearchBarProps {
   value: string;
@@ -15,6 +15,22 @@ export function SearchBar({
   placeholder = 'Etsi palapelin nimellä, valmistajalla (esim. Ravensburger, Clementoni)...',
 }: SearchBarProps) {
   const inputRef = useRef<HTMLInputElement>(null);
+  const [localValue, setLocalValue] = useState(value);
+
+  // Synchronize localValue when parent value changes externally (e.g. filter reset)
+  useEffect(() => {
+    setLocalValue(value);
+  }, [value]);
+
+  // 300ms Debounce effect to prevent API thrashing
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (localValue !== value) {
+        onChange(localValue);
+      }
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [localValue, value, onChange]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -27,6 +43,7 @@ export function SearchBar({
           target &&
           (target.tagName === 'INPUT' ||
             target.tagName === 'TEXTAREA' ||
+            target.tagName === 'SELECT' ||
             target.isContentEditable)
         ) {
           return;
@@ -46,20 +63,23 @@ export function SearchBar({
       <input
         ref={inputRef}
         type="text"
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
+        value={localValue}
+        onChange={(e) => setLocalValue(e.target.value)}
         placeholder={placeholder}
         aria-label="Etsi palapelejä"
-        className="w-full bg-[#f4f8f5] border border-[#d2e6db] rounded-xl pl-10 pr-12 py-2.5 text-xs sm:text-sm font-semibold text-[#0f291e] placeholder:text-[#4a6b5d] focus:outline-none focus:bg-white focus:ring-2 focus:ring-[#047857]/20 focus:border-[#047857] transition-all min-h-[44px]"
+        className="w-full bg-[#f4f8f5] border border-[#d2e6db] rounded-xl pl-10 pr-12 py-2.5 text-base sm:text-sm font-semibold text-[#0f291e] placeholder:text-[#4a6b5d] focus:outline-none focus:bg-white focus:ring-2 focus:ring-[#047857]/20 focus:border-[#047857] transition-all min-h-[44px]"
       />
-      {!value && (
+      {!localValue && (
         <kbd className="absolute right-3 top-1/2 -translate-y-1/2 hidden sm:inline-flex items-center px-1.5 py-0.5 text-[10px] font-mono font-medium text-[#4a6b5d] bg-[#e2f0e8] border border-[#d2e6db] rounded pointer-events-none select-none">
           ⌘K
         </kbd>
       )}
-      {value && (
+      {localValue && (
         <button
-          onClick={() => onChange('')}
+          onClick={() => {
+            setLocalValue('');
+            onChange('');
+          }}
           aria-label="Tyhjennä haku"
           className="absolute right-0.5 top-1/2 -translate-y-1/2 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg text-[#4a6b5d] hover:text-[#0f291e] hover:bg-[#e2f0e8] transition-colors focus:outline-none focus:ring-2 focus:ring-[#047857]"
         >

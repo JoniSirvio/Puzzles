@@ -25,7 +25,7 @@ export function Header() {
           <nav className="flex items-center gap-1 bg-[#f0f7f3] p-1 rounded-xl border border-[#d2e6db]">
             <Link
               href="/"
-              className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all min-h-[36px] flex items-center gap-1.5 ${
+              className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all min-h-[44px] flex items-center gap-1.5 ${
                 pathname === '/'
                   ? 'bg-[#064e3b] text-white shadow-xs'
                   : 'text-[#0f291e] hover:bg-[#e2f0e8]'
@@ -38,7 +38,7 @@ export function Header() {
 
             <Link
               href="/omatsivut"
-              className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all min-h-[36px] flex items-center gap-1.5 relative ${
+              className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all min-h-[44px] flex items-center gap-1.5 relative ${
                 pathname === '/omatsivut'
                   ? 'bg-[#064e3b] text-white shadow-xs'
                   : 'text-[#0f291e] hover:bg-[#e2f0e8]'

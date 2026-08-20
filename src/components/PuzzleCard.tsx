@@ -44,6 +44,8 @@ export function PuzzleCard({ puzzle }: PuzzleCardProps) {
               <img
                 src={puzzle.imageUrl}
                 alt={puzzle.title}
+                decoding="async"
+                loading="lazy"
                 onLoad={() => setImageLoaded(true)}
                 onError={() => setImageError(true)}
                 className={`w-full h-full object-contain transition-all duration-500 ${
@@ -60,25 +62,25 @@ export function PuzzleCard({ puzzle }: PuzzleCardProps) {
 
           {/* Top-Left: Store Badge */}
           <div className="absolute top-3 left-3 max-w-[55%] pointer-events-none z-10">
-            <span className="inline-block bg-[#0f291e]/90 backdrop-blur-md text-emerald-100 text-[11px] font-bold px-2.5 py-1 rounded-xl shadow-xs border border-emerald-800/40 truncate max-w-full">
+            <span className="inline-block bg-[#0f291e]/95 text-emerald-100 text-[11px] font-bold px-2.5 py-1 rounded-xl shadow-xs border border-emerald-800/40 truncate max-w-full">
               {puzzle.sourceStore.name}
             </span>
           </div>
 
-          {/* Top-Right: Mobile-First Collection Trigger Button */}
+          {/* Top-Right: Mobile-First Collection Trigger Button (WCAG 2.5.5 44x44px target) */}
           <div className="absolute top-3 right-3 z-20">
             <button
               onClick={() => setShowActionModal(true)}
               title="Lisää tai muokkaa kokoelmassa"
-              aria-label="Avaa kokoelmahaldinta"
-              className={`p-2 rounded-2xl shadow-md backdrop-blur-md transition-all active:scale-90 min-w-[40px] min-h-[40px] flex items-center justify-center ${
+              aria-label="Avaa kokoelmahallinta"
+              className={`p-2 rounded-2xl shadow-md transition-all active:scale-90 min-w-[44px] min-h-[44px] flex items-center justify-center ${
                 status === 'WISHLIST'
-                  ? 'bg-rose-50/95 text-rose-600 border border-rose-200'
+                  ? 'bg-rose-50 text-rose-600 border border-rose-200'
                   : status === 'OWNED_NOT_DONE'
-                  ? 'bg-[#e6f4ed]/95 text-[#047857] border border-[#a7f3d0]'
+                  ? 'bg-[#e6f4ed] text-[#047857] border border-[#a7f3d0]'
                   : status === 'OWNED_DONE'
                   ? 'bg-[#064e3b] text-white shadow-xs border border-emerald-800'
-                  : 'bg-white/95 text-[#047857] hover:bg-[#f0f7f3] border border-[#d2e6db]'
+                  : 'bg-white text-[#047857] hover:bg-[#f0f7f3] border border-[#d2e6db]'
               }`}
             >
               {status === 'WISHLIST' && (
@@ -105,7 +107,7 @@ export function PuzzleCard({ puzzle }: PuzzleCardProps) {
 
           {/* Bottom-Right: In-Stock Indicator */}
           <div className="absolute bottom-3 right-3 z-10 pointer-events-none">
-            <span className="inline-flex items-center gap-1.5 bg-white/95 backdrop-blur-md text-[#064e3b] text-[10px] font-bold px-2 py-1 rounded-xl border border-[#d2e6db] shadow-2xs">
+            <span className="inline-flex items-center gap-1.5 bg-white/95 text-[#064e3b] text-[10px] font-bold px-2 py-1 rounded-xl border border-[#d2e6db] shadow-2xs">
               <span
                 className={`w-1.5 h-1.5 rounded-full ${
                   puzzle.inStock !== false ? 'bg-[#059669]' : 'bg-rose-500'
@@ -146,7 +148,7 @@ export function PuzzleCard({ puzzle }: PuzzleCardProps) {
 
           <div className="mt-auto pt-3.5 border-t border-[#f0f7f3] flex items-end justify-between gap-2">
             <div>
-              <span className="text-[11px] font-semibold text-[#658577] block mb-0.5">Hinta</span>
+              <span className="text-[11px] font-bold text-[#4a6b5d] block mb-0.5">Hinta</span>
               <span className="text-lg font-black text-[#0f291e] tracking-tight">
                 {formattedPrice}
               </span>

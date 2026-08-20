@@ -126,7 +126,7 @@ export default function HomePage() {
                     setPieceCount(opt.value);
                     setOffset(0);
                   }}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                  className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all min-h-[44px] flex items-center justify-center ${
                     isActive
                       ? 'bg-[#047857] text-white shadow-xs'
                       : 'bg-[#f4f8f5] text-[#0f291e] hover:bg-[#e2f0e8] border border-[#d2e6db]'
@@ -141,7 +141,7 @@ export default function HomePage() {
           {isFiltered && (
             <button
               onClick={handleResetFilters}
-              className="text-xs font-bold text-[#047857] hover:text-[#064e3b] hover:underline inline-flex items-center gap-1 transition-colors self-start sm:self-auto"
+              className="text-xs font-bold text-[#047857] hover:text-[#064e3b] hover:underline inline-flex items-center gap-1 transition-colors self-start sm:self-auto min-h-[44px]"
             >
               <RotateCcw className="w-3.5 h-3.5" />
               <span>Tyhjennä hakuehdot</span>
@@ -156,36 +156,36 @@ export default function HomePage() {
               Aktiiviset rajaus-ehdot:
             </span>
             {search && (
-              <span className="inline-flex items-center gap-1 bg-[#e6f4ed] text-[#064e3b] text-xs font-bold px-2.5 py-1 rounded-lg border border-[#a7f3d0]">
+              <span className="inline-flex items-center gap-1.5 bg-[#e6f4ed] text-[#064e3b] text-xs font-bold pl-3 pr-1 py-0.5 rounded-xl border border-[#a7f3d0]">
                 <span>Haku: &quot;{search}&quot;</span>
                 <button
                   onClick={() => setSearch('')}
                   aria-label="Poista hakusana"
-                  className="hover:text-emerald-900 font-black ml-0.5"
+                  className="hover:text-emerald-900 font-black min-w-[36px] min-h-[36px] flex items-center justify-center"
                 >
                   ✕
                 </button>
               </span>
             )}
             {pieceCount && (
-              <span className="inline-flex items-center gap-1 bg-[#e6f4ed] text-[#064e3b] text-xs font-bold px-2.5 py-1 rounded-lg border border-[#a7f3d0]">
+              <span className="inline-flex items-center gap-1.5 bg-[#e6f4ed] text-[#064e3b] text-xs font-bold pl-3 pr-1 py-0.5 rounded-xl border border-[#a7f3d0]">
                 <span>Koko: {getPieceLabel(pieceCount)}</span>
                 <button
                   onClick={() => setPieceCount('')}
                   aria-label="Poista palapelikoko suodatin"
-                  className="hover:text-emerald-900 font-black ml-0.5"
+                  className="hover:text-emerald-900 font-black min-w-[36px] min-h-[36px] flex items-center justify-center"
                 >
                   ✕
                 </button>
               </span>
             )}
             {sort && (
-              <span className="inline-flex items-center gap-1 bg-[#e6f4ed] text-[#064e3b] text-xs font-bold px-2.5 py-1 rounded-lg border border-[#a7f3d0]">
+              <span className="inline-flex items-center gap-1.5 bg-[#e6f4ed] text-[#064e3b] text-xs font-bold pl-3 pr-1 py-0.5 rounded-xl border border-[#a7f3d0]">
                 <span>Järjestys: {getSortLabel(sort)}</span>
                 <button
                   onClick={() => setSort('')}
                   aria-label="Poista järjestys"
-                  className="hover:text-emerald-900 font-black ml-0.5"
+                  className="hover:text-emerald-900 font-black min-w-[36px] min-h-[36px] flex items-center justify-center"
                 >
                   ✕
                 </button>

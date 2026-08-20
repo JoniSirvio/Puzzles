@@ -15,7 +15,7 @@ export function SortControls({ value, onChange }: SortControlsProps) {
         value={value}
         onChange={(e) => onChange(e.target.value)}
         aria-label="Järjestä palapelit"
-        className="bg-[#f4f8f5] border border-[#d2e6db] rounded-xl pl-10 pr-9 py-2.5 text-xs sm:text-sm font-bold text-[#0f291e] hover:border-[#a7f3d0] focus:outline-none focus:bg-white focus:ring-2 focus:ring-[#047857]/20 focus:border-[#047857] transition-all appearance-none cursor-pointer"
+        className="bg-[#f4f8f5] border border-[#d2e6db] rounded-xl pl-10 pr-9 py-2.5 text-base sm:text-xs font-bold text-[#0f291e] hover:border-[#a7f3d0] focus:outline-none focus:bg-white focus:ring-2 focus:ring-[#047857]/20 focus:border-[#047857] transition-all appearance-none cursor-pointer min-h-[44px]"
       >
         <option value="">Järjestys: Uusimmat / Oletus</option>
         <option value="price-asc">Hinta: Alin ensin</option>
