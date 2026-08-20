@@ -39,7 +39,7 @@ export function PuzzleCard({ puzzle }: PuzzleCardProps) {
 
   return (
     <>
-      <article className="group relative flex flex-col bg-white rounded-2xl border border-[#e2ede7] overflow-hidden hover:border-[#a7f3d0] hover:shadow-xl hover:shadow-[#064e3b]/8 transition-all duration-300">
+      <article className="group relative flex flex-col bg-white rounded-2xl border border-[#bce0cd] shadow-md shadow-[#064e3b]/8 overflow-hidden hover:border-[#047857] hover:shadow-xl hover:shadow-[#064e3b]/15 transition-all duration-300">
         {/* Image Container */}
         <div className="relative aspect-square w-full bg-[#f4f8f5] overflow-hidden flex items-center justify-center p-5">
           {activeImageUrl && !imageError ? (

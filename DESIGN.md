@@ -8,7 +8,7 @@ A tactile, organic Finnish puzzle studio identity anchored in rich **Nordic Pine
 
 ## Color System
 
-- **Background**: `#fbfaf6` (Warm Oatmeal paper ground with subtle dot grid texture)
+- **Background**: `#fbfaf6` (Warm Oatmeal paper ground with seamless tactile debossed interlocking puzzle pattern `/puzzle-pattern.svg`)
 - **Primary Brand / Banner**: `#064e3b` (Deep Finnish Pine Green)
 - **Primary Action**: `#064e3b` (Pine Green button, hovering to `#047857`)
 - **Accent / Badges**: `#047857` (Rich Emerald for piece count badges)

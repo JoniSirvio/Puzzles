@@ -163,7 +163,7 @@ export default function HomePage() {
       </div>
 
       {/* Desktop Workspace Control Bar (>= sm viewports) */}
-      <section className="hidden sm:block bg-white border border-[#d2e6db] rounded-2xl p-4 sm:p-5 shadow-xs space-y-4">
+      <section className="hidden sm:block bg-white border border-[#bce0cd] rounded-2xl p-4 sm:p-5 shadow-md shadow-[#064e3b]/6 space-y-4">
         <h2 className="sr-only">Palapelihaku ja suodattimet</h2>
         {/* Store Selection */}
         <StoreFilter
@@ -182,7 +182,7 @@ export default function HomePage() {
         {/* Piece Count Filter & Global Reset */}
         <div className="pt-3.5 border-t border-[#f0f7f3] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="text-xs font-bold text-[#4a6b5d] mr-1">Palapelin koko:</span>
+            <span className="text-xs font-bold text-[#0f291e] mr-1">Palapelin koko:</span>
             {PIECE_COUNT_OPTIONS.map((opt) => {
               const isActive = pieceCount === opt.value;
               return (
@@ -195,7 +195,7 @@ export default function HomePage() {
                   className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all min-h-[44px] flex items-center justify-center ${
                     isActive
                       ? 'bg-[#047857] text-white shadow-xs'
-                      : 'bg-[#f4f8f5] text-[#0f291e] hover:bg-[#e2f0e8] border border-[#d2e6db]'
+                      : 'bg-[#f0f7f3] text-[#0f291e] hover:bg-[#e0f0e6] border border-[#bce0cd]'
                   }`}
                 >
                   {opt.label}
@@ -218,7 +218,7 @@ export default function HomePage() {
 
       {/* Active Filter Pills Bar (both Mobile and Desktop) */}
       {isFiltered && (
-        <div className="bg-white border border-[#d2e6db] rounded-2xl p-3 shadow-2xs flex flex-wrap items-center gap-2">
+        <div className="bg-white border border-[#bce0cd] rounded-2xl p-3 shadow-xs flex flex-wrap items-center gap-2">
           <span className="text-[11px] font-bold text-[#4a6b5d] uppercase tracking-wider">
             Aktiiviset suodattimet:
           </span>
@@ -273,13 +273,15 @@ export default function HomePage() {
         </div>
       )}
 
-      {/* Results Counter */}
+      {/* Results Counter Badge */}
       {!loading && !error && (
-        <div className="flex items-center justify-between px-1">
-          <h2 className="text-xs sm:text-sm font-bold text-[#0f291e]">
-            Löytyi <span className="text-[#047857] font-black">{total}</span> palapeliä
-            {search && <span> hakusanalla &quot;{search}&quot;</span>}
-          </h2>
+        <div className="flex items-center justify-between">
+          <div className="inline-flex items-center gap-2 bg-white/90 backdrop-blur-xs border border-[#bce0cd] rounded-xl px-3.5 py-1.5 shadow-2xs">
+            <h2 className="text-xs sm:text-sm font-bold text-[#0f291e]">
+              Löytyi <span className="text-[#047857] font-black">{total}</span> palapeliä
+              {search && <span> hakusanalla &quot;{search}&quot;</span>}
+            </h2>
+          </div>
         </div>
       )}
 

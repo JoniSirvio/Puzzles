@@ -16,7 +16,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="fi">
-      <body className="min-h-screen flex flex-col bg-[#fbfaf6] text-[#0f291e] antialiased selection:bg-[#a7f3d0] selection:text-[#064e3b]">
+      <body className="min-h-screen flex flex-col bg-[#edf3ef] text-[#0f291e] antialiased selection:bg-[#a7f3d0] selection:text-[#064e3b]">
         <Providers>
           {/* Header */}
           <Header />

@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 :root {
-  --background: #fbfaf6;
+  --background: #edf3ef;
   --foreground: #0f291e;
   --pine-900: #064e3b;
   --pine-800: #047857;
@@ -17,10 +17,10 @@ body {
   color: var(--foreground);
   background-color: var(--background);
   font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-  background-image: radial-gradient(#064e3b 0.4px, transparent 0.4px);
-  background-size: 24px 24px;
-  background-color: #fbfaf6;
-  opacity: 0.99;
+  background-image: url('/puzzle-pattern.svg');
+  background-size: 200px 200px;
+  background-repeat: repeat;
+  background-attachment: fixed;
 }
 
 /* Custom scrollbar styling */

@@ -81,7 +81,7 @@ export function SortControls({ value, onChange, iconOnly = false }: SortControls
           onClick={() => setIsOpen(!isOpen)}
           aria-label="Järjestä palapelit"
           aria-expanded={isOpen}
-          className="inline-flex items-center gap-2 bg-[#f4f8f5] border border-[#d2e6db] rounded-xl pl-3.5 pr-3 py-2.5 text-xs font-bold text-[#0f291e] hover:border-[#a7f3d0] focus:outline-none focus:bg-white focus:ring-2 focus:ring-[#047857]/20 focus:border-[#047857] transition-all min-h-[44px]"
+          className="inline-flex items-center gap-2 bg-[#f4f8f5] border border-[#bce0cd] rounded-xl pl-3.5 pr-3 py-2.5 text-xs font-bold text-[#0f291e] hover:border-[#047857] focus:outline-none focus:bg-white focus:ring-2 focus:ring-[#047857]/20 focus:border-[#047857] transition-all min-h-[44px]"
         >
           <ArrowUpDown className="w-3.5 h-3.5 text-[#047857] stroke-[2]" />
           <span>Järjestys: {selectedOption.label}</span>
