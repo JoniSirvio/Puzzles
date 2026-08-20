@@ -1,0 +1,57 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Deny access by default to unmapped collections
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // User document and library subcollection rules
+    match /users/{userId} {
+      // User can only access their own user document
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+
+      // Rules for user's personal puzzle library collection
+      match /library/{puzzleId} {
+        
+        // Helper: Check if user is authenticated and owns this path
+        function isOwner() {
+          return request.auth != null && request.auth.uid == userId;
+        }
+
+        // Helper: Validate library item schema and constraints
+        function isValidLibraryItem() {
+          let data = request.resource.data;
+          
+          return data.id is string && data.id.size() <= 128
+            && data.userId == request.auth.uid
+            && data.status in ['WISHLIST', 'OWNED_NOT_DONE', 'OWNED_DONE']
+            && data.updatedAt is number
+            // Optional rating validation: if present, must be integer 1-5
+            && (!('rating' in data) || (data.rating is int && data.rating >= 1 && data.rating <= 5))
+            // Optional notes validation: if present, must be string <= 1000 chars
+            && (!('notes' in data) || (data.notes is string && data.notes.size() <= 1000))
+            // Cached puzzle snapshot validation
+            && data.puzzle is map
+            && data.puzzle.id is string
+            && data.puzzle.title is string
+            && data.puzzle.title.size() <= 300;
+        }
+
+        // Allow reading own library items
+        allow read: if isOwner();
+
+        // Allow creating own library item with strict validation
+        allow create: if isOwner() && isValidLibraryItem();
+
+        // Allow updating own library item with strict validation
+        allow update: if isOwner() && isValidLibraryItem();
+
+        // Allow deleting own library item
+        allow delete: if isOwner();
+      }
+    }
+  }
+}
