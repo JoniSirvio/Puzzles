@@ -113,9 +113,9 @@ export default function HomePage() {
   return (
     <div className="space-y-6">
       {/* Mobile Control Bar (< sm viewports) */}
-      <div className="sm:hidden relative">
+      <div className="sm:hidden relative bg-white border border-[#d2e6db] rounded-2xl p-2.5 shadow-xs overflow-hidden">
         {/* Compact 1-Line Action Bar */}
-        <div className="flex items-center gap-2 bg-white border border-[#d2e6db] rounded-2xl p-2.5 shadow-xs">
+        <div className="flex items-center gap-2">
           {/* 1. Expandable Search Trigger Button */}
           <button
             onClick={() => setMobileSearchOpen(true)}
@@ -149,7 +149,7 @@ export default function HomePage() {
 
         {/* Slide-over Full Width Search Input Bar */}
         {mobileSearchOpen && (
-          <div className="absolute inset-0 z-20 flex items-center gap-2 bg-white rounded-2xl p-1.5 shadow-md border border-[#047857] animate-search-expand">
+          <div className="absolute inset-2.5 z-20 flex items-center gap-2 bg-white rounded-xl animate-search-expand">
             <SearchBar value={search} onChange={handleSearchChange} />
             <button
               onClick={() => setMobileSearchOpen(false)}
