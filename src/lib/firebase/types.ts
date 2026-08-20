@@ -8,6 +8,7 @@ export interface UserPuzzleItem {
   status: LibraryStatus;
   rating?: number; // 1-5
   notes?: string;
+  userPhotoUrl?: string; // WebP compressed data URL or image URL of completed puzzle
   updatedAt: number;
   puzzle: Puzzle;
 }

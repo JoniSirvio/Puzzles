@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { ExternalLink, Heart, Package, CheckCircle2, Star, Tag, Plus } from 'lucide-react';
+import { ExternalLink, Heart, Package, CheckCircle2, Star, Tag, Plus, Camera } from 'lucide-react';
 import { Puzzle } from '@/lib/scrapers/types';
 import { useLibrary } from '@/context/LibraryContext';
 import { RatingModal } from './RatingModal';
@@ -16,18 +16,25 @@ export function PuzzleCard({ puzzle }: PuzzleCardProps) {
   const [imageLoaded, setImageLoaded] = useState(false);
   const [showRatingModal, setShowRatingModal] = useState(false);
   const [showActionModal, setShowActionModal] = useState(false);
+  const [showUserPhoto, setShowUserPhoto] = useState(true);
 
   const { getItemStatus, toggleWishlist, toggleOwnedNotDone, toggleOwnedDone, removeItem } = useLibrary();
   const libraryItem = getItemStatus(puzzle.id);
   const status = libraryItem?.status;
+
+  const hasUserPhoto = Boolean(libraryItem?.userPhotoUrl);
+  const activeImageUrl =
+    hasUserPhoto && showUserPhoto && libraryItem?.userPhotoUrl
+      ? libraryItem.userPhotoUrl
+      : puzzle.imageUrl;
 
   const formattedPrice = new Intl.NumberFormat('fi-FI', {
     style: 'currency',
     currency: puzzle.currency || 'EUR',
   }).format(puzzle.price);
 
-  const handleRatingSave = async (rating: number, notes?: string) => {
-    await toggleOwnedDone(puzzle, rating, notes);
+  const handleRatingSave = async (rating: number, notes?: string, userPhotoUrl?: string) => {
+    await toggleOwnedDone(puzzle, rating, notes, userPhotoUrl);
   };
 
   return (
@@ -35,20 +42,23 @@ export function PuzzleCard({ puzzle }: PuzzleCardProps) {
       <article className="group relative flex flex-col bg-white rounded-2xl border border-[#e2ede7] overflow-hidden hover:border-[#a7f3d0] hover:shadow-xl hover:shadow-[#064e3b]/8 transition-all duration-300">
         {/* Image Container */}
         <div className="relative aspect-square w-full bg-[#f4f8f5] overflow-hidden flex items-center justify-center p-5">
-          {puzzle.imageUrl && !imageError ? (
+          {activeImageUrl && !imageError ? (
             <>
               {!imageLoaded && (
                 <div className="absolute inset-0 bg-[#e6f4ed] animate-pulse" />
               )}
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src={puzzle.imageUrl}
+                key={activeImageUrl}
+                src={activeImageUrl}
                 alt={puzzle.title}
                 decoding="async"
                 loading="lazy"
                 onLoad={() => setImageLoaded(true)}
                 onError={() => setImageError(true)}
-                className={`w-full h-full object-contain transition-all duration-500 ${
+                className={`w-full h-full ${
+                  hasUserPhoto && showUserPhoto ? 'object-cover rounded-xl' : 'object-contain'
+                } transition-all duration-500 ${
                   imageLoaded ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
                 } group-hover:scale-105`}
               />
@@ -60,11 +70,24 @@ export function PuzzleCard({ puzzle }: PuzzleCardProps) {
             </div>
           )}
 
-          {/* Top-Left: Store Badge */}
-          <div className="absolute top-3 left-3 max-w-[55%] pointer-events-none z-10">
-            <span className="inline-block bg-[#0f291e]/95 text-emerald-100 text-[11px] font-bold px-2.5 py-1 rounded-xl shadow-xs border border-emerald-800/40 truncate max-w-full">
-              {puzzle.sourceStore.name}
-            </span>
+          {/* Top-Left: Store Badge or Photo Toggle Button */}
+          <div className="absolute top-3 left-3 max-w-[65%] z-10 flex flex-col items-start gap-1.5">
+            {hasUserPhoto ? (
+              <button
+                type="button"
+                onClick={() => setShowUserPhoto(!showUserPhoto)}
+                title="Vaihda oman kuvan ja kaupan kuvan välillä"
+                aria-label="Vaihda kuvanähdyttä"
+                className="bg-[#064e3b] hover:bg-[#047857] active:scale-95 text-white text-[11px] font-bold px-2.5 py-1 rounded-xl shadow-md border border-emerald-500/50 flex items-center gap-1.5 transition-all min-h-[36px] cursor-pointer"
+              >
+                <Camera className="w-3.5 h-3.5 text-emerald-300" />
+                <span>{showUserPhoto ? '📸 Oma kuva' : '🖼️ Kauppa'}</span>
+              </button>
+            ) : (
+              <span className="inline-block bg-[#0f291e]/95 text-emerald-100 text-[11px] font-bold px-2.5 py-1 rounded-xl shadow-xs border border-emerald-800/40 truncate max-w-full pointer-events-none">
+                {puzzle.sourceStore.name}
+              </span>
+            )}
           </div>
 
           {/* Top-Right: Mobile-First Collection Trigger Button (WCAG 2.5.5 44x44px target) */}
@@ -189,6 +212,7 @@ export function PuzzleCard({ puzzle }: PuzzleCardProps) {
           puzzle={puzzle}
           initialRating={libraryItem?.rating || 5}
           initialNotes={libraryItem?.notes || ''}
+          initialPhotoUrl={libraryItem?.userPhotoUrl || ''}
           onSave={handleRatingSave}
           onClose={() => setShowRatingModal(false)}
         />

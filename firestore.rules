@@ -33,6 +33,8 @@ service cloud.firestore {
             && (!('rating' in data) || (data.rating is int && data.rating >= 1 && data.rating <= 5))
             // Optional notes validation: if present, must be string <= 1000 chars
             && (!('notes' in data) || (data.notes is string && data.notes.size() <= 1000))
+            // Optional userPhotoUrl validation: if present, must be string <= 300,000 chars
+            && (!('userPhotoUrl' in data) || (data.userPhotoUrl is string && data.userPhotoUrl.size() <= 300000))
             // Cached puzzle snapshot validation
             && data.puzzle is map
             && data.puzzle.id is string

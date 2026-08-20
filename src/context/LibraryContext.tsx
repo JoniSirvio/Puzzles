@@ -17,8 +17,18 @@ interface LibraryContextType {
   getItemStatus: (puzzleId: string) => UserPuzzleItem | undefined;
   toggleWishlist: (puzzle: Puzzle) => Promise<void>;
   toggleOwnedNotDone: (puzzle: Puzzle) => Promise<void>;
-  toggleOwnedDone: (puzzle: Puzzle, rating?: number, notes?: string) => Promise<void>;
-  updateRatingAndNotes: (puzzleId: string, rating: number, notes?: string) => Promise<void>;
+  toggleOwnedDone: (
+    puzzle: Puzzle,
+    rating?: number,
+    notes?: string,
+    userPhotoUrl?: string
+  ) => Promise<void>;
+  updateRatingAndNotes: (
+    puzzleId: string,
+    rating: number,
+    notes?: string,
+    userPhotoUrl?: string
+  ) => Promise<void>;
   removeItem: (puzzleId: string) => Promise<void>;
 }
 
@@ -96,21 +106,38 @@ export function LibraryProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const toggleOwnedDone = async (puzzle: Puzzle, rating?: number, notes?: string) => {
+  const toggleOwnedDone = async (
+    puzzle: Puzzle,
+    rating?: number,
+    notes?: string,
+    userPhotoUrl?: string
+  ) => {
     if (!requireUser() || !user) return;
     const current = libraryMap[puzzle.id];
     if (current && current.status === 'OWNED_DONE') {
       await removeUserPuzzle(user.uid, puzzle.id);
     } else {
-      await setUserPuzzleStatus(user.uid, puzzle, 'OWNED_DONE', rating, notes);
+      await setUserPuzzleStatus(user.uid, puzzle, 'OWNED_DONE', rating, notes, userPhotoUrl);
     }
   };
 
-  const updateRatingAndNotes = async (puzzleId: string, rating: number, notes?: string) => {
+  const updateRatingAndNotes = async (
+    puzzleId: string,
+    rating: number,
+    notes?: string,
+    userPhotoUrl?: string
+  ) => {
     if (!requireUser() || !user) return;
     const current = libraryMap[puzzleId];
     if (current) {
-      await setUserPuzzleStatus(user.uid, current.puzzle, current.status, rating, notes);
+      await setUserPuzzleStatus(
+        user.uid,
+        current.puzzle,
+        current.status,
+        rating,
+        notes,
+        userPhotoUrl
+      );
     }
   };
 

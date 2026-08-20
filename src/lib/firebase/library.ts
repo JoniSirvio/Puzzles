@@ -16,7 +16,8 @@ export async function setUserPuzzleStatus(
   puzzle: Puzzle,
   status: LibraryStatus,
   rating?: number,
-  notes?: string
+  notes?: string,
+  userPhotoUrl?: string
 ): Promise<void> {
   if (!userId || !puzzle || !puzzle.id) return;
 
@@ -31,6 +32,7 @@ export async function setUserPuzzleStatus(
 
   if (rating !== undefined) data.rating = rating;
   if (notes !== undefined) data.notes = notes;
+  if (userPhotoUrl !== undefined) data.userPhotoUrl = userPhotoUrl;
 
   await setDoc(itemRef, data, { merge: true });
 }
