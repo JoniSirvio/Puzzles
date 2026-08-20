@@ -26,6 +26,9 @@ jobs:
       - name: Build Next.js application
         run: npm run build
 
+      - name: Enable Firebase Web Frameworks experiment
+        run: npx firebase-tools experiments:enable webframeworks
+
       - name: Deploy to Firebase
         run: npx firebase-tools deploy --project puzzles-ccfee --force
         env:
