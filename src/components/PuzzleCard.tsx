@@ -1,10 +1,11 @@
 'use client';
 
 import { useState } from 'react';
-import { ExternalLink, Heart, Package, CheckCircle2, Star, Tag } from 'lucide-react';
+import { ExternalLink, Heart, Package, CheckCircle2, Star, Tag, Plus } from 'lucide-react';
 import { Puzzle } from '@/lib/scrapers/types';
 import { useLibrary } from '@/context/LibraryContext';
 import { RatingModal } from './RatingModal';
+import { CollectionActionModal } from './CollectionActionModal';
 
 interface PuzzleCardProps {
   puzzle: Puzzle;
@@ -14,8 +15,9 @@ export function PuzzleCard({ puzzle }: PuzzleCardProps) {
   const [imageError, setImageError] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
   const [showRatingModal, setShowRatingModal] = useState(false);
+  const [showActionModal, setShowActionModal] = useState(false);
 
-  const { getItemStatus, toggleWishlist, toggleOwnedNotDone, toggleOwnedDone } = useLibrary();
+  const { getItemStatus, toggleWishlist, toggleOwnedNotDone, toggleOwnedDone, removeItem } = useLibrary();
   const libraryItem = getItemStatus(puzzle.id);
   const status = libraryItem?.status;
 
@@ -63,56 +65,32 @@ export function PuzzleCard({ puzzle }: PuzzleCardProps) {
             </span>
           </div>
 
-          {/* Top-Right: Quick User Action Buttons Bar */}
-          <div className="absolute top-3 right-3 flex items-center gap-1 bg-white/95 backdrop-blur-md p-1 rounded-2xl shadow-md border border-[#d2e6db] z-20">
-            {/* Wishlist Button */}
+          {/* Top-Right: Mobile-First Collection Trigger Button */}
+          <div className="absolute top-3 right-3 z-20">
             <button
-              onClick={() => toggleWishlist(puzzle)}
-              title="Lisää toivelistalle"
-              aria-label="Lisää toivelistalle"
-              className={`p-1.5 rounded-xl transition-all min-w-[36px] min-h-[36px] flex items-center justify-center ${
+              onClick={() => setShowActionModal(true)}
+              title="Lisää tai muokkaa kokoelmassa"
+              aria-label="Avaa kokoelmahaldinta"
+              className={`p-2 rounded-2xl shadow-md backdrop-blur-md transition-all active:scale-90 min-w-[40px] min-h-[40px] flex items-center justify-center ${
                 status === 'WISHLIST'
-                  ? 'bg-rose-50 text-rose-600 border border-rose-200'
-                  : 'text-[#4a6b5d] hover:bg-[#f0f7f3] hover:text-[#0f291e]'
-              }`}
-            >
-              <Heart
-                className={`w-4 h-4 ${status === 'WISHLIST' ? 'fill-rose-500 text-rose-500' : 'text-[#658577]'}`}
-              />
-            </button>
-
-            {/* Owned Not Done Button */}
-            <button
-              onClick={() => toggleOwnedNotDone(puzzle)}
-              title="Merkitse omistetuksi (tekemättä)"
-              aria-label="Merkitse omistetuksi (tekemättä)"
-              className={`p-1.5 rounded-xl transition-all min-w-[36px] min-h-[36px] flex items-center justify-center ${
-                status === 'OWNED_NOT_DONE'
-                  ? 'bg-[#e6f4ed] text-[#047857] border border-[#a7f3d0]'
-                  : 'text-[#4a6b5d] hover:bg-[#f0f7f3] hover:text-[#0f291e]'
-              }`}
-            >
-              <Package className="w-4 h-4" />
-            </button>
-
-            {/* Owned Done Button */}
-            <button
-              onClick={() => {
-                if (status === 'OWNED_DONE') {
-                  toggleOwnedDone(puzzle);
-                } else {
-                  setShowRatingModal(true);
-                }
-              }}
-              title="Merkitse kootuksi"
-              aria-label="Merkitse kootuksi"
-              className={`p-1.5 rounded-xl transition-all min-w-[36px] min-h-[36px] flex items-center justify-center ${
-                status === 'OWNED_DONE'
+                  ? 'bg-rose-50/95 text-rose-600 border border-rose-200'
+                  : status === 'OWNED_NOT_DONE'
+                  ? 'bg-[#e6f4ed]/95 text-[#047857] border border-[#a7f3d0]'
+                  : status === 'OWNED_DONE'
                   ? 'bg-[#064e3b] text-white shadow-xs border border-emerald-800'
-                  : 'text-[#4a6b5d] hover:bg-[#f0f7f3] hover:text-[#0f291e]'
+                  : 'bg-white/95 text-[#047857] hover:bg-[#f0f7f3] border border-[#d2e6db]'
               }`}
             >
-              <CheckCircle2 className="w-4 h-4" />
+              {status === 'WISHLIST' && (
+                <Heart className="w-4 h-4 fill-rose-500 text-rose-500" />
+              )}
+              {status === 'OWNED_NOT_DONE' && (
+                <Package className="w-4 h-4 text-[#047857]" />
+              )}
+              {status === 'OWNED_DONE' && (
+                <CheckCircle2 className="w-4 h-4 text-white" />
+              )}
+              {!status && <Plus className="w-4.5 h-4.5 text-[#047857] stroke-[2.5]" />}
             </button>
           </div>
 
@@ -128,7 +106,11 @@ export function PuzzleCard({ puzzle }: PuzzleCardProps) {
           {/* Bottom-Right: In-Stock Indicator */}
           <div className="absolute bottom-3 right-3 z-10 pointer-events-none">
             <span className="inline-flex items-center gap-1.5 bg-white/95 backdrop-blur-md text-[#064e3b] text-[10px] font-bold px-2 py-1 rounded-xl border border-[#d2e6db] shadow-2xs">
-              <span className={`w-1.5 h-1.5 rounded-full ${puzzle.inStock !== false ? 'bg-[#059669]' : 'bg-rose-500'}`} />
+              <span
+                className={`w-1.5 h-1.5 rounded-full ${
+                  puzzle.inStock !== false ? 'bg-[#059669]' : 'bg-rose-500'
+                }`}
+              />
               {puzzle.inStock !== false ? 'Varastossa' : 'Tarkista'}
             </span>
           </div>
@@ -182,6 +164,22 @@ export function PuzzleCard({ puzzle }: PuzzleCardProps) {
           </div>
         </div>
       </article>
+
+      {/* Collection Action Modal / Mobile Bottom Sheet */}
+      {showActionModal && (
+        <CollectionActionModal
+          puzzle={puzzle}
+          currentStatus={status}
+          onSelectWishlist={() => toggleWishlist(puzzle)}
+          onSelectOwnedNotDone={() => toggleOwnedNotDone(puzzle)}
+          onSelectOwnedDone={() => {
+            setShowActionModal(false);
+            setShowRatingModal(true);
+          }}
+          onRemoveFromLibrary={() => removeItem(puzzle.id)}
+          onClose={() => setShowActionModal(false)}
+        />
+      )}
 
       {/* Rating Modal */}
       {showRatingModal && (
