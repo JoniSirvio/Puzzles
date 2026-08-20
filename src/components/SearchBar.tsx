@@ -7,15 +7,27 @@ interface SearchBarProps {
   value: string;
   onChange: (val: string) => void;
   placeholder?: string;
+  autoFocus?: boolean;
 }
 
 export function SearchBar({
   value,
   onChange,
   placeholder = 'Etsi palapelin nimellä, valmistajalla...',
+  autoFocus = false,
 }: SearchBarProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [localValue, setLocalValue] = useState(value);
+
+  // Auto-focus input on mount if autoFocus is true
+  useEffect(() => {
+    if (autoFocus) {
+      const timer = setTimeout(() => {
+        inputRef.current?.focus();
+      }, 50);
+      return () => clearTimeout(timer);
+    }
+  }, [autoFocus]);
 
   // Synchronize localValue when parent value changes externally (e.g. filter reset)
   useEffect(() => {

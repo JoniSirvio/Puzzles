@@ -150,7 +150,7 @@ export default function HomePage() {
         {/* Slide-over Full Width Search Input Bar */}
         {mobileSearchOpen && (
           <div className="absolute inset-2.5 z-20 flex items-center gap-2 bg-white rounded-xl animate-search-expand">
-            <SearchBar value={search} onChange={handleSearchChange} />
+            <SearchBar value={search} onChange={handleSearchChange} autoFocus />
             <button
               onClick={() => setMobileSearchOpen(false)}
               aria-label="Sulje haku"
