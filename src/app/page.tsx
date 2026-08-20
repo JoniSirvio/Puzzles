@@ -149,7 +149,7 @@ export default function HomePage() {
 
         {/* Slide-over Full Width Search Input Bar */}
         {mobileSearchOpen && (
-          <div className="absolute inset-0 z-20 flex items-center gap-2 bg-white rounded-2xl p-1.5 shadow-md border border-[#047857] animate-menu-slide-down">
+          <div className="absolute inset-0 z-20 flex items-center gap-2 bg-white rounded-2xl p-1.5 shadow-md border border-[#047857] animate-search-expand">
             <SearchBar value={search} onChange={handleSearchChange} />
             <button
               onClick={() => setMobileSearchOpen(false)}
