@@ -110,15 +110,15 @@ export function SortControls({ value, onChange, iconOnly = false }: SortControls
               role="dialog"
               aria-modal="true"
               aria-labelledby="sort-modal-title"
-              className="relative z-10 w-full bg-white rounded-t-3xl shadow-2xl border border-[#d2e6db] p-5 overflow-hidden transform transition-all duration-300 animate-slideUp"
+              className="relative z-10 w-full max-h-[85vh] flex flex-col bg-white rounded-t-3xl shadow-2xl border border-[#d2e6db] p-5 pb-8 overflow-hidden transform transition-all duration-300 animate-slideUp"
             >
               {/* Drag handle */}
-              <div className="flex items-center justify-center pt-1 pb-3">
+              <div className="flex items-center justify-center pt-1 pb-3 shrink-0">
                 <div className="w-12 h-1.25 bg-[#d2e6db] rounded-full" />
               </div>
 
               {/* Header */}
-              <div className="flex items-center justify-between pb-4 border-b border-[#e2ede7] mb-4">
+              <div className="flex items-center justify-between pb-4 border-b border-[#e2ede7] mb-4 shrink-0">
                 <div className="flex items-center gap-2">
                   <div className="w-8 h-8 rounded-xl bg-[#e6f4ed] text-[#047857] flex items-center justify-center border border-[#a7f3d0]">
                     <ArrowUpDown className="w-4 h-4" />
@@ -137,7 +137,7 @@ export function SortControls({ value, onChange, iconOnly = false }: SortControls
               </div>
 
               {/* Options list */}
-              <div className="space-y-2">
+              <div className="space-y-2 overflow-y-auto flex-1 pr-1 pb-2">
                 {SORT_OPTIONS.map((opt) => {
                   const isSelected = value === opt.value;
                   return (
