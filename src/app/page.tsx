@@ -18,7 +18,7 @@ const PIECE_COUNT_OPTIONS = [
 ];
 
 export default function HomePage() {
-  const [selectedStore, setSelectedStore] = useState('karkkainen');
+  const [selectedStore, setSelectedStore] = useState('all');
   const [offset, setOffset] = useState(0);
   const [search, setSearch] = useState('');
   const [sort, setSort] = useState('');

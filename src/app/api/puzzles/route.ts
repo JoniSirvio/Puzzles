@@ -1,30 +1,71 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getScraper } from '@/lib/scrapers';
+import { getAllScrapers, getScraper } from '@/lib/scrapers';
+import { Puzzle, ScrapeResult } from '@/lib/scrapers/types';
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
-  const storeId = searchParams.get('store') || 'karkkainen';
+  const storeId = searchParams.get('store') || 'all';
   const offset = parseInt(searchParams.get('offset') || '0', 10);
   const search = searchParams.get('search') || '';
   const sort = searchParams.get('sort') || '';
   const pieceCount = searchParams.get('pieceCount') || '';
 
-  const scraper = getScraper(storeId);
-  if (!scraper) {
-    return NextResponse.json(
-      { error: `Tuntematon tai tukematon kauppa: ${storeId}` },
-      { status: 400 }
+  const validOffset = isNaN(offset) ? 0 : offset;
+
+  let combinedItems: Puzzle[] = [];
+  let combinedTotal = 0;
+  let hasMore = false;
+  let storeName = 'Kaikki kaupat';
+
+  if (storeId === 'all') {
+    const scrapers = getAllScrapers();
+    const scrapeResults = await Promise.all(
+      scrapers.map((scraper) =>
+        scraper.scrape({
+          offset: validOffset,
+          search,
+          pieceCount: pieceCount || undefined,
+        })
+      )
     );
+
+    // Merge items from all scrapers round-robin style for fair store distribution
+    const itemsByStore = scrapeResults.map((r) => r.items || []);
+    const maxLen = Math.max(...itemsByStore.map((arr) => arr.length), 0);
+
+    for (let i = 0; i < maxLen; i++) {
+      for (const storeItems of itemsByStore) {
+        if (i < storeItems.length) {
+          combinedItems.push(storeItems[i]);
+        }
+      }
+    }
+
+    combinedTotal = scrapeResults.reduce((acc, r) => acc + (r.total || 0), 0);
+    hasMore = scrapeResults.some((r) => r.hasMore);
+  } else {
+    const scraper = getScraper(storeId);
+    if (!scraper) {
+      return NextResponse.json(
+        { error: `Tuntematon tai tukematon kauppa: ${storeId}` },
+        { status: 400 }
+      );
+    }
+
+    const result = await scraper.scrape({
+      offset: validOffset,
+      search,
+      pieceCount: pieceCount || undefined,
+    });
+
+    combinedItems = result.items || [];
+    combinedTotal = result.total || 0;
+    hasMore = result.hasMore;
+    storeName = result.storeName || storeId;
   }
 
-  const result = await scraper.scrape({
-    offset: isNaN(offset) ? 0 : offset,
-    search,
-    pieceCount: pieceCount || undefined,
-  });
-
   // Client-side search filtering if provided
-  let filteredItems = result.items;
+  let filteredItems = combinedItems;
   if (search.trim()) {
     const q = search.toLowerCase().trim();
     filteredItems = filteredItems.filter(
@@ -66,23 +107,13 @@ export async function GET(request: NextRequest) {
     filteredItems.sort((a, b) => (b.pieceCount || 0) - (a.pieceCount || 0));
   }
 
-  // Determine true total count for response
-  let finalTotal = result.total;
-  if (search.trim() || pieceCount) {
-    // If local filtering reduced items count or native search returned fewer items than store total
-    if (result.items.length < result.total && result.total === 2255 && filteredItems.length < result.items.length) {
-      finalTotal = filteredItems.length;
-    } else if (result.items.length <= 60 && result.items.length === result.total) {
-      finalTotal = filteredItems.length;
-    } else if (filteredItems.length < result.items.length && result.total > filteredItems.length) {
-      // Scale or cap total based on filtered ratio
-      finalTotal = Math.round(result.total * (filteredItems.length / result.items.length));
-    }
-  }
-
   return NextResponse.json({
-    ...result,
-    total: finalTotal,
     items: filteredItems,
+    total: combinedTotal,
+    offset: validOffset,
+    limit: 60,
+    hasMore,
+    storeId,
+    storeName,
   });
 }
