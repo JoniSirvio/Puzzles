@@ -113,51 +113,51 @@ export default function HomePage() {
   return (
     <div className="space-y-6">
       {/* Mobile Control Bar (< sm viewports) */}
-      <div className="sm:hidden space-y-3">
-        {mobileSearchOpen ? (
-          /* Expandable Search Input Slider */
-          <div className="flex items-center gap-2 animate-menu-slide-down">
+      <div className="sm:hidden relative">
+        {/* Compact 1-Line Action Bar */}
+        <div className="flex items-center gap-2 bg-white border border-[#d2e6db] rounded-2xl p-2.5 shadow-xs">
+          {/* 1. Expandable Search Trigger Button */}
+          <button
+            onClick={() => setMobileSearchOpen(true)}
+            className="flex-1 flex items-center gap-2 bg-[#f4f8f5] hover:bg-[#e2f0e8] text-[#4a6b5d] px-3.5 py-2.5 rounded-xl border border-[#d2e6db] font-semibold text-xs transition-colors min-h-[44px] min-w-0"
+          >
+            <Search className="w-4 h-4 text-[#047857] shrink-0" />
+            <span className="truncate">{search ? `"${search}"` : 'Etsi...'}</span>
+          </button>
+
+          {/* 2. Filter Bottom Sheet Trigger Button */}
+          <button
+            onClick={() => setShowFilterModal(true)}
+            className={`flex items-center gap-1.5 px-3 py-2.5 rounded-xl border font-bold text-xs transition-all min-h-[44px] shrink-0 ${
+              activeFilterCount > 0
+                ? 'bg-[#064e3b] text-white border-emerald-800 shadow-xs'
+                : 'bg-[#f4f8f5] text-[#0f291e] border-[#d2e6db] hover:bg-[#e2f0e8]'
+            }`}
+          >
+            <SlidersHorizontal className="w-4 h-4" />
+            <span>Suodattimet</span>
+            {activeFilterCount > 0 && (
+              <span className="bg-emerald-400 text-emerald-950 font-black text-[10px] w-4 h-4 rounded-full flex items-center justify-center ml-0.5">
+                {activeFilterCount}
+              </span>
+            )}
+          </button>
+
+          {/* 3. Sort Select Dropdown (Icon Only on Mobile) */}
+          <SortControls value={sort} onChange={setSort} iconOnly />
+        </div>
+
+        {/* Slide-over Full Width Search Input Bar */}
+        {mobileSearchOpen && (
+          <div className="absolute inset-0 z-20 flex items-center gap-2 bg-white rounded-2xl p-1.5 shadow-md border border-[#047857] animate-menu-slide-down">
             <SearchBar value={search} onChange={handleSearchChange} />
             <button
               onClick={() => setMobileSearchOpen(false)}
               aria-label="Sulje haku"
-              className="p-2.5 bg-white border border-[#d2e6db] text-[#4a6b5d] rounded-xl min-w-[44px] min-h-[44px] flex items-center justify-center shrink-0"
+              className="p-2.5 bg-[#f4f8f5] border border-[#d2e6db] text-[#4a6b5d] hover:text-[#0f291e] rounded-xl min-w-[44px] min-h-[44px] flex items-center justify-center shrink-0"
             >
-              <X className="w-5 h-5" />
+              <X className="w-5 h-5 stroke-[2.5]" />
             </button>
-          </div>
-        ) : (
-          /* Compact 1-Line Action Bar */
-          <div className="flex items-center gap-2 bg-white border border-[#d2e6db] rounded-2xl p-2.5 shadow-xs">
-            {/* 1. Expandable Search Trigger Button */}
-            <button
-              onClick={() => setMobileSearchOpen(true)}
-              className="flex-1 flex items-center gap-2 bg-[#f4f8f5] hover:bg-[#e2f0e8] text-[#4a6b5d] px-3.5 py-2.5 rounded-xl border border-[#d2e6db] font-semibold text-xs transition-colors min-h-[44px]"
-            >
-              <Search className="w-4 h-4 text-[#047857]" />
-              <span className="truncate">{search ? `"${search}"` : 'Etsi palapelejä...'}</span>
-            </button>
-
-            {/* 2. Filter Bottom Sheet Trigger Button */}
-            <button
-              onClick={() => setShowFilterModal(true)}
-              className={`flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl border font-bold text-xs transition-all min-h-[44px] shrink-0 ${
-                activeFilterCount > 0
-                  ? 'bg-[#064e3b] text-white border-emerald-800 shadow-xs'
-                  : 'bg-[#f4f8f5] text-[#0f291e] border-[#d2e6db] hover:bg-[#e2f0e8]'
-              }`}
-            >
-              <SlidersHorizontal className="w-4 h-4" />
-              <span>Suodattimet</span>
-              {activeFilterCount > 0 && (
-                <span className="bg-emerald-400 text-emerald-950 font-black text-[10px] w-4 h-4 rounded-full flex items-center justify-center ml-0.5">
-                  {activeFilterCount}
-                </span>
-              )}
-            </button>
-
-            {/* 3. Sort Select Dropdown */}
-            <SortControls value={sort} onChange={setSort} compact />
           </div>
         )}
       </div>
