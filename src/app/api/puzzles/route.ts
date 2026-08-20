@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAllScrapers, getScraper } from '@/lib/scrapers';
-import { Puzzle, ScrapeResult } from '@/lib/scrapers/types';
+import { Puzzle } from '@/lib/scrapers/types';
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
@@ -64,16 +64,14 @@ export async function GET(request: NextRequest) {
     storeName = result.storeName || storeId;
   }
 
-  // Client-side search filtering if provided
+  // Tokenized Multi-word Search Filtering
   let filteredItems = combinedItems;
   if (search.trim()) {
-    const q = search.toLowerCase().trim();
-    filteredItems = filteredItems.filter(
-      (item) =>
-        item.title.toLowerCase().includes(q) ||
-        (item.brand && item.brand.toLowerCase().includes(q)) ||
-        (item.pieceCount && item.pieceCount.toString().includes(q))
-    );
+    const searchTerms = search.toLowerCase().trim().split(/\s+/);
+    filteredItems = filteredItems.filter((item) => {
+      const targetText = `${item.title} ${item.brand || ''} ${item.pieceCount || ''}`.toLowerCase();
+      return searchTerms.every((term) => targetText.includes(term));
+    });
   }
 
   // Piece count filtering
@@ -107,12 +105,20 @@ export async function GET(request: NextRequest) {
     filteredItems.sort((a, b) => (b.pieceCount || 0) - (a.pieceCount || 0));
   }
 
+  // Calculate true total count accurately when search or pieceCount filter is active
+  let finalTotal = combinedTotal;
+  if (search.trim() || pieceCount) {
+    if (!hasMore || filteredItems.length < combinedItems.length) {
+      finalTotal = validOffset + filteredItems.length;
+    }
+  }
+
   return NextResponse.json({
     items: filteredItems,
-    total: combinedTotal,
+    total: finalTotal,
     offset: validOffset,
     limit: 60,
-    hasMore,
+    hasMore: hasMore && filteredItems.length >= 60,
     storeId,
     storeName,
   });
