@@ -7,7 +7,9 @@ import { SearchBar } from '@/components/SearchBar';
 import { SortControls } from '@/components/SortControls';
 import { PuzzleGrid } from '@/components/PuzzleGrid';
 import { Pagination } from '@/components/Pagination';
-import { RotateCcw } from 'lucide-react';
+import { FilterModal } from '@/components/FilterModal';
+import { RotateCcw, Search, SlidersHorizontal, X } from 'lucide-react';
+import { SUPPORTED_STORES } from '@/lib/scrapers';
 
 const PIECE_COUNT_OPTIONS = [
   { label: 'Kaikki', value: '' },
@@ -23,6 +25,10 @@ export default function HomePage() {
   const [search, setSearch] = useState('');
   const [sort, setSort] = useState('');
   const [pieceCount, setPieceCount] = useState('');
+
+  // Mobile-specific control states
+  const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
+  const [showFilterModal, setShowFilterModal] = useState(false);
 
   const [puzzles, setPuzzles] = useState<Puzzle[]>([]);
   const [total, setTotal] = useState(0);
@@ -73,13 +79,17 @@ export default function HomePage() {
   };
 
   const handleResetFilters = () => {
+    setSelectedStore('all');
     setSearch('');
     setPieceCount('');
     setSort('');
     setOffset(0);
   };
 
-  const isFiltered = Boolean(search || pieceCount || sort);
+  const activeFilterCount =
+    (selectedStore !== 'all' ? 1 : 0) + (pieceCount ? 1 : 0) + (search ? 1 : 0);
+
+  const isFiltered = Boolean(search || pieceCount || sort || selectedStore !== 'all');
 
   const getSortLabel = (val: string) => {
     if (val === 'price-asc') return 'Hinta: Alin ensin';
@@ -94,10 +104,66 @@ export default function HomePage() {
     return opt ? opt.label : val;
   };
 
+  const getStoreName = (id: string) => {
+    if (id === 'all') return 'Kaikki kaupat';
+    const st = SUPPORTED_STORES.find((s) => s.id === id);
+    return st ? st.name : id;
+  };
+
   return (
     <div className="space-y-6">
-      {/* Workspace Control Bar */}
-      <section className="bg-white border border-[#d2e6db] rounded-2xl p-4 sm:p-5 shadow-xs space-y-4">
+      {/* Mobile Control Bar (< sm viewports) */}
+      <div className="sm:hidden space-y-3">
+        {mobileSearchOpen ? (
+          /* Expandable Search Input Slider */
+          <div className="flex items-center gap-2 animate-menu-slide-down">
+            <SearchBar value={search} onChange={handleSearchChange} />
+            <button
+              onClick={() => setMobileSearchOpen(false)}
+              aria-label="Sulje haku"
+              className="p-2.5 bg-white border border-[#d2e6db] text-[#4a6b5d] rounded-xl min-w-[44px] min-h-[44px] flex items-center justify-center shrink-0"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+        ) : (
+          /* Compact 1-Line Action Bar */
+          <div className="flex items-center gap-2 bg-white border border-[#d2e6db] rounded-2xl p-2.5 shadow-xs">
+            {/* 1. Expandable Search Trigger Button */}
+            <button
+              onClick={() => setMobileSearchOpen(true)}
+              className="flex-1 flex items-center gap-2 bg-[#f4f8f5] hover:bg-[#e2f0e8] text-[#4a6b5d] px-3.5 py-2.5 rounded-xl border border-[#d2e6db] font-semibold text-xs transition-colors min-h-[44px]"
+            >
+              <Search className="w-4 h-4 text-[#047857]" />
+              <span className="truncate">{search ? `"${search}"` : 'Etsi palapelejä...'}</span>
+            </button>
+
+            {/* 2. Filter Bottom Sheet Trigger Button */}
+            <button
+              onClick={() => setShowFilterModal(true)}
+              className={`flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl border font-bold text-xs transition-all min-h-[44px] shrink-0 ${
+                activeFilterCount > 0
+                  ? 'bg-[#064e3b] text-white border-emerald-800 shadow-xs'
+                  : 'bg-[#f4f8f5] text-[#0f291e] border-[#d2e6db] hover:bg-[#e2f0e8]'
+              }`}
+            >
+              <SlidersHorizontal className="w-4 h-4" />
+              <span>Suodattimet</span>
+              {activeFilterCount > 0 && (
+                <span className="bg-emerald-400 text-emerald-950 font-black text-[10px] w-4 h-4 rounded-full flex items-center justify-center ml-0.5">
+                  {activeFilterCount}
+                </span>
+              )}
+            </button>
+
+            {/* 3. Sort Select Dropdown */}
+            <SortControls value={sort} onChange={setSort} />
+          </div>
+        )}
+      </div>
+
+      {/* Desktop Workspace Control Bar (>= sm viewports) */}
+      <section className="hidden sm:block bg-white border border-[#d2e6db] rounded-2xl p-4 sm:p-5 shadow-xs space-y-4">
         <h2 className="sr-only">Palapelihaku ja suodattimet</h2>
         {/* Store Selection */}
         <StoreFilter
@@ -148,52 +214,64 @@ export default function HomePage() {
             </button>
           )}
         </div>
-
-        {/* Active Filter Pills Bar */}
-        {isFiltered && (
-          <div className="pt-3 border-t border-[#f0f7f3] flex flex-wrap items-center gap-2">
-            <span className="text-[11px] font-bold text-[#4a6b5d] uppercase tracking-wider">
-              Aktiiviset rajaus-ehdot:
-            </span>
-            {search && (
-              <span className="inline-flex items-center gap-1.5 bg-[#e6f4ed] text-[#064e3b] text-xs font-bold pl-3 pr-1 py-0.5 rounded-xl border border-[#a7f3d0]">
-                <span>Haku: &quot;{search}&quot;</span>
-                <button
-                  onClick={() => setSearch('')}
-                  aria-label="Poista hakusana"
-                  className="hover:text-emerald-900 font-black min-w-[36px] min-h-[36px] flex items-center justify-center"
-                >
-                  ✕
-                </button>
-              </span>
-            )}
-            {pieceCount && (
-              <span className="inline-flex items-center gap-1.5 bg-[#e6f4ed] text-[#064e3b] text-xs font-bold pl-3 pr-1 py-0.5 rounded-xl border border-[#a7f3d0]">
-                <span>Koko: {getPieceLabel(pieceCount)}</span>
-                <button
-                  onClick={() => setPieceCount('')}
-                  aria-label="Poista palapelikoko suodatin"
-                  className="hover:text-emerald-900 font-black min-w-[36px] min-h-[36px] flex items-center justify-center"
-                >
-                  ✕
-                </button>
-              </span>
-            )}
-            {sort && (
-              <span className="inline-flex items-center gap-1.5 bg-[#e6f4ed] text-[#064e3b] text-xs font-bold pl-3 pr-1 py-0.5 rounded-xl border border-[#a7f3d0]">
-                <span>Järjestys: {getSortLabel(sort)}</span>
-                <button
-                  onClick={() => setSort('')}
-                  aria-label="Poista järjestys"
-                  className="hover:text-emerald-900 font-black min-w-[36px] min-h-[36px] flex items-center justify-center"
-                >
-                  ✕
-                </button>
-              </span>
-            )}
-          </div>
-        )}
       </section>
+
+      {/* Active Filter Pills Bar (both Mobile and Desktop) */}
+      {isFiltered && (
+        <div className="bg-white border border-[#d2e6db] rounded-2xl p-3 shadow-2xs flex flex-wrap items-center gap-2">
+          <span className="text-[11px] font-bold text-[#4a6b5d] uppercase tracking-wider">
+            Aktiiviset suodattimet:
+          </span>
+          {selectedStore !== 'all' && (
+            <span className="inline-flex items-center gap-1.5 bg-[#e6f4ed] text-[#064e3b] text-xs font-bold pl-3 pr-1 py-0.5 rounded-xl border border-[#a7f3d0]">
+              <span>Kauppa: {getStoreName(selectedStore)}</span>
+              <button
+                onClick={() => setSelectedStore('all')}
+                aria-label="Poista kauppasuodatin"
+                className="hover:text-emerald-900 font-black min-w-[36px] min-h-[36px] flex items-center justify-center"
+              >
+                ✕
+              </button>
+            </span>
+          )}
+          {search && (
+            <span className="inline-flex items-center gap-1.5 bg-[#e6f4ed] text-[#064e3b] text-xs font-bold pl-3 pr-1 py-0.5 rounded-xl border border-[#a7f3d0]">
+              <span>Haku: &quot;{search}&quot;</span>
+              <button
+                onClick={() => setSearch('')}
+                aria-label="Poista hakusana"
+                className="hover:text-emerald-900 font-black min-w-[36px] min-h-[36px] flex items-center justify-center"
+              >
+                ✕
+              </button>
+            </span>
+          )}
+          {pieceCount && (
+            <span className="inline-flex items-center gap-1.5 bg-[#e6f4ed] text-[#064e3b] text-xs font-bold pl-3 pr-1 py-0.5 rounded-xl border border-[#a7f3d0]">
+              <span>Koko: {getPieceLabel(pieceCount)}</span>
+              <button
+                onClick={() => setPieceCount('')}
+                aria-label="Poista palapelikoko suodatin"
+                className="hover:text-emerald-900 font-black min-w-[36px] min-h-[36px] flex items-center justify-center"
+              >
+                ✕
+              </button>
+            </span>
+          )}
+          {sort && (
+            <span className="inline-flex items-center gap-1.5 bg-[#e6f4ed] text-[#064e3b] text-xs font-bold pl-3 pr-1 py-0.5 rounded-xl border border-[#a7f3d0]">
+              <span>Järjestys: {getSortLabel(sort)}</span>
+              <button
+                onClick={() => setSort('')}
+                aria-label="Poista järjestys"
+                className="hover:text-emerald-900 font-black min-w-[36px] min-h-[36px] flex items-center justify-center"
+              >
+                ✕
+              </button>
+            </span>
+          )}
+        </div>
+      )}
 
       {/* Results Counter */}
       {!loading && !error && (
@@ -221,6 +299,22 @@ export default function HomePage() {
           limit={60}
           total={total}
           onOffsetChange={setOffset}
+        />
+      )}
+
+      {/* Mobile Filter Bottom Sheet Modal */}
+      {showFilterModal && (
+        <FilterModal
+          selectedStore={selectedStore}
+          pieceCount={pieceCount}
+          totalResults={total}
+          onApply={(store, pieces) => {
+            setSelectedStore(store);
+            setPieceCount(pieces);
+            setOffset(0);
+          }}
+          onReset={handleResetFilters}
+          onClose={() => setShowFilterModal(false)}
         />
       )}
     </div>
