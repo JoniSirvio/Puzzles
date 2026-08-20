@@ -121,20 +121,22 @@ export function Header() {
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             aria-label={mobileMenuOpen ? 'Sulje valikko' : 'Avaa valikko'}
             aria-expanded={mobileMenuOpen}
-            className="p-2.5 rounded-xl bg-[#f0f7f3] border border-[#d2e6db] text-[#0f291e] hover:bg-[#e2f0e8] transition-colors focus:outline-none focus:ring-2 focus:ring-[#047857] min-w-[44px] min-h-[44px] flex items-center justify-center"
+            className="p-2.5 rounded-xl bg-[#f0f7f3] border border-[#d2e6db] text-[#0f291e] hover:bg-[#e2f0e8] transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-[#047857] min-w-[44px] min-h-[44px] flex items-center justify-center"
           >
-            {mobileMenuOpen ? (
-              <X className="w-5 h-5 stroke-[2.5]" />
-            ) : (
-              <Menu className="w-5 h-5 stroke-[2.5]" />
-            )}
+            <div className={`transition-transform duration-300 ${mobileMenuOpen ? 'rotate-90 scale-105' : 'rotate-0'}`}>
+              {mobileMenuOpen ? (
+                <X className="w-5 h-5 stroke-[2.5]" />
+              ) : (
+                <Menu className="w-5 h-5 stroke-[2.5]" />
+              )}
+            </div>
           </button>
         </div>
       </div>
 
       {/* Mobile Burger Dropdown Navigation Panel */}
       {mobileMenuOpen && (
-        <div className="sm:hidden border-t border-[#e2ede7] bg-[#fbfaf6] shadow-xl animate-fadeIn">
+        <div className="sm:hidden border-t border-[#e2ede7] bg-[#fbfaf6] shadow-xl animate-menu-slide-down overflow-hidden">
           <nav className="p-4 space-y-2">
             {/* 1. Selaa Valikoimaa */}
             <Link
