@@ -1,5 +1,4 @@
 import { getAllScrapers } from './index';
-import { Puzzle } from './types';
 import { upsertPuzzles } from '@/lib/services/puzzleDb';
 
 export interface SyncStoreResult {
@@ -19,7 +18,7 @@ export interface SyncSummary {
 
 /**
  * Scrapes the complete product catalog across all enabled store scrapers
- * and batch updates/upserts the results into the Firestore 'puzzles' collection.
+ * in parallel and incrementally upserts each page batch into Firestore.
  */
 export async function syncAllStorePuzzles(): Promise<SyncSummary> {
   const startTime = Date.now();
@@ -27,11 +26,12 @@ export async function syncAllStorePuzzles(): Promise<SyncSummary> {
   const storeResults: SyncStoreResult[] = [];
   let totalPuzzlesSynced = 0;
 
-  for (const scraper of scrapers) {
+  // Run stores in parallel to maximize throughput
+  const storePromises = scrapers.map(async (scraper) => {
     const storeId = scraper.storeInfo.id;
     const storeName = scraper.storeInfo.name;
     let pageCount = 0;
-    let storeItems: Puzzle[] = [];
+    let storeTotalSynced = 0;
     const limit = 60;
     let offset = 0;
     let hasMore = true;
@@ -39,8 +39,7 @@ export async function syncAllStorePuzzles(): Promise<SyncSummary> {
 
     console.log(`Starting full catalog sync for store: ${storeName} (${storeId})...`);
 
-    // Loop through pages until no more items are returned
-    while (hasMore && pageCount < 50) {
+    while (hasMore && pageCount < 40) {
       try {
         const result = await scraper.scrape({ offset, limit });
         pageCount++;
@@ -56,12 +55,15 @@ export async function syncAllStorePuzzles(): Promise<SyncSummary> {
           break;
         }
 
-        storeItems.push(...result.items);
+        // Upsert immediately per page batch to guarantee persistence even if stopped
+        const { updatedCount } = await upsertPuzzles(result.items);
+        storeTotalSynced += updatedCount;
+
         hasMore = result.hasMore && result.items.length > 0;
         offset += limit;
 
-        // Polite delay between page fetches to avoid rate limiting
-        await new Promise((resolve) => setTimeout(resolve, 300));
+        // Small polite delay between requests
+        await new Promise((resolve) => setTimeout(resolve, 150));
       } catch (err: any) {
         storeError = err.message || 'Scraping virhe';
         console.error(`Unexpected scraping error for ${storeName} page ${pageCount}:`, err);
@@ -69,34 +71,19 @@ export async function syncAllStorePuzzles(): Promise<SyncSummary> {
       }
     }
 
-    // Deduplicate items by product ID
-    const uniqueItemsMap = new Map<string, Puzzle>();
-    for (const item of storeItems) {
-      if (item.id) {
-        uniqueItemsMap.set(item.id, item);
-      }
-    }
-    const uniqueItems = Array.from(uniqueItemsMap.values());
-
-    // Batch upsert to Firestore
-    if (uniqueItems.length > 0) {
-      try {
-        const { updatedCount } = await upsertPuzzles(uniqueItems);
-        totalPuzzlesSynced += updatedCount;
-        console.log(`Successfully synced ${updatedCount} puzzles for ${storeName}.`);
-      } catch (dbErr: any) {
-        storeError = dbErr.message || 'Tietokannan tallennusvirhe';
-        console.error(`Database save error for ${storeName}:`, dbErr);
-      }
-    }
-
-    storeResults.push({
+    return {
       storeId,
       storeName,
-      itemCount: uniqueItems.length,
+      itemCount: storeTotalSynced,
       pagesScraped: pageCount,
       error: storeError,
-    });
+    };
+  });
+
+  const results = await Promise.all(storePromises);
+  for (const r of results) {
+    storeResults.push(r);
+    totalPuzzlesSynced += r.itemCount;
   }
 
   const durationMs = Date.now() - startTime;

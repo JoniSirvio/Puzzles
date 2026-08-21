@@ -4,6 +4,8 @@ import { getAllScrapers, getScraper } from '@/lib/scrapers';
 import { Puzzle } from '@/lib/scrapers/types';
 import { syncAllStorePuzzles } from '@/lib/scrapers/sync';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const storeId = searchParams.get('store') || 'all';
@@ -17,8 +19,8 @@ export async function GET(request: NextRequest) {
   try {
     const storedCount = await getPuzzleCount();
 
-    // Primary path: Query Firestore database populated by 9:00 AM Cloud Function
-    if (storedCount > 0) {
+    // Primary path: Query Firestore if sufficiently populated (>= 100 items from multiple stores)
+    if (storedCount >= 100) {
       const result = await queryStoredPuzzles({
         storeId,
         search,
@@ -28,21 +30,17 @@ export async function GET(request: NextRequest) {
         limit: 60,
       });
 
-      return NextResponse.json(result);
+      // If results are found or offset is beyond page 0 with valid total
+      if (result.items.length > 0 || (validOffset > 0 && result.total > 0)) {
+        return NextResponse.json(result);
+      }
     }
 
-    // Fallback path: If Firestore collection is empty on first boot, trigger background sync and serve live scrapers
-    console.warn('Firestore puzzle catalog is empty. Triggering background sync and serving live scrapers fallback...');
-    
-    // Trigger background sync non-blockingly
-    syncAllStorePuzzles().catch((err) =>
-      console.error('Initial background sync error:', err)
-    );
-
-    // Serve live scraped results so user never sees blank screen
+    // Fallback path: If Firestore catalog is unpopulated or only has partial single-store data (< 100 items)
+    console.log(`Serving live scraper fallback (storedCount in DB: ${storedCount})...`);
     return serveLiveScrapedFallback({ storeId, validOffset, search, sort, pieceCount });
   } catch (err: any) {
-    console.error('Error fetching puzzles from database, falling back to live scrapers:', err);
+    console.error('Database query error, serving live scrapers fallback:', err);
     return serveLiveScrapedFallback({ storeId, validOffset, search, sort, pieceCount });
   }
 }
