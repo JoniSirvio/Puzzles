@@ -55,5 +55,13 @@ service cloud.firestore {
         allow delete: if isOwner();
       }
     }
+
+    // Public puzzle catalog collection rules
+    match /puzzles/{puzzleId} {
+      // Anyone can read puzzle catalog documents
+      allow read: if true;
+      // Client-side direct writes prohibited (managed by Admin SDK / Cloud Functions)
+      allow write: if false;
+    }
   }
 }

@@ -2,6 +2,18 @@
   "firestore": {
     "rules": "firestore.rules"
   },
+  "functions": [
+    {
+      "source": "functions",
+      "codebase": "default",
+      "ignore": [
+        "node_modules",
+        ".git",
+        "firebase-debug.log",
+        "firebase-debug.*.log"
+      ]
+    }
+  ],
   "hosting": {
     "site": "puzzles-ccfee",
     "app": "1:742565754612:web:cf7e6324cd542b0c1c50a1",

@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getPuzzleCount, queryStoredPuzzles } from '@/lib/services/puzzleDb';
 import { getAllScrapers, getScraper } from '@/lib/scrapers';
 import { Puzzle } from '@/lib/scrapers/types';
+import { syncAllStorePuzzles } from '@/lib/scrapers/sync';
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
@@ -10,7 +12,49 @@ export async function GET(request: NextRequest) {
   const sort = searchParams.get('sort') || '';
   const pieceCount = searchParams.get('pieceCount') || '';
 
-  const validOffset = isNaN(offset) ? 0 : offset;
+  const validOffset = isNaN(offset) || offset < 0 ? 0 : offset;
+
+  try {
+    const storedCount = await getPuzzleCount();
+
+    // Primary path: Query Firestore database populated by 9:00 AM Cloud Function
+    if (storedCount > 0) {
+      const result = await queryStoredPuzzles({
+        storeId,
+        search,
+        sort,
+        pieceCount,
+        offset: validOffset,
+        limit: 60,
+      });
+
+      return NextResponse.json(result);
+    }
+
+    // Fallback path: If Firestore collection is empty on first boot, trigger background sync and serve live scrapers
+    console.warn('Firestore puzzle catalog is empty. Triggering background sync and serving live scrapers fallback...');
+    
+    // Trigger background sync non-blockingly
+    syncAllStorePuzzles().catch((err) =>
+      console.error('Initial background sync error:', err)
+    );
+
+    // Serve live scraped results so user never sees blank screen
+    return serveLiveScrapedFallback({ storeId, validOffset, search, sort, pieceCount });
+  } catch (err: any) {
+    console.error('Error fetching puzzles from database, falling back to live scrapers:', err);
+    return serveLiveScrapedFallback({ storeId, validOffset, search, sort, pieceCount });
+  }
+}
+
+async function serveLiveScrapedFallback(params: {
+  storeId: string;
+  validOffset: number;
+  search: string;
+  sort: string;
+  pieceCount: string;
+}) {
+  const { storeId, validOffset, search, sort, pieceCount } = params;
 
   let combinedItems: Puzzle[] = [];
   let combinedTotal = 0;
@@ -29,7 +73,6 @@ export async function GET(request: NextRequest) {
       )
     );
 
-    // Merge items from all scrapers round-robin style for fair store distribution
     const itemsByStore = scrapeResults.map((r) => r.items || []);
     const maxLen = Math.max(...itemsByStore.map((arr) => arr.length), 0);
 
@@ -64,7 +107,6 @@ export async function GET(request: NextRequest) {
     storeName = result.storeName || storeId;
   }
 
-  // Tokenized Multi-word Search Filtering
   let filteredItems = combinedItems;
   if (search.trim()) {
     const searchTerms = search.toLowerCase().trim().split(/\s+/);
@@ -74,27 +116,17 @@ export async function GET(request: NextRequest) {
     });
   }
 
-  // Piece count filtering
   if (pieceCount) {
     filteredItems = filteredItems.filter((item) => {
       if (item.pieceCount === undefined || item.pieceCount === null) return false;
-      if (pieceCount === 'under500') {
-        return item.pieceCount < 400;
-      }
-      if (pieceCount === '500') {
-        return item.pieceCount >= 400 && item.pieceCount <= 750;
-      }
-      if (pieceCount === '1000') {
-        return item.pieceCount >= 751 && item.pieceCount <= 1250;
-      }
-      if (pieceCount === '1500+') {
-        return item.pieceCount > 1250;
-      }
+      if (pieceCount === 'under500') return item.pieceCount < 400;
+      if (pieceCount === '500') return item.pieceCount >= 400 && item.pieceCount <= 750;
+      if (pieceCount === '1000') return item.pieceCount >= 751 && item.pieceCount <= 1250;
+      if (pieceCount === '1500+') return item.pieceCount > 1250;
       return true;
     });
   }
 
-  // Sorting
   if (sort === 'price-asc') {
     filteredItems.sort((a, b) => a.price - b.price);
   } else if (sort === 'price-desc') {
@@ -105,17 +137,9 @@ export async function GET(request: NextRequest) {
     filteredItems.sort((a, b) => (b.pieceCount || 0) - (a.pieceCount || 0));
   }
 
-  // Calculate true total count accurately when search or pieceCount filter is active
-  let finalTotal = combinedTotal;
-  if (search.trim() || pieceCount) {
-    if (!hasMore || filteredItems.length < combinedItems.length) {
-      finalTotal = validOffset + filteredItems.length;
-    }
-  }
-
   return NextResponse.json({
     items: filteredItems,
-    total: finalTotal,
+    total: combinedTotal,
     offset: validOffset,
     limit: 60,
     hasMore: hasMore && filteredItems.length >= 60,
